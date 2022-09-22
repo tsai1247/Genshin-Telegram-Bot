@@ -1,5 +1,6 @@
 from asyncio import sleep
 from collections import UserDict
+from datetime import datetime, timedelta, timezone
 import types
 from typing import Sequence
 from dosdefence import isDos, getID
@@ -13,6 +14,7 @@ import genshin
 from genshin.client import cache as client_cache
 from genshin.models import hoyolab as hoyolab_models
 from genshin.client.components.base import *
+from genshin.models.genshin import chronicle as models
 
 class UserStatus:
     statusList = {}
@@ -145,6 +147,92 @@ async def notice(update, bot):
 async def setaccount(update, bot):
     if(isDos(update)): return
     await Send(update, "setaccount")
+
+async def note(update, bot):
+    def getTime(time: datetime):
+        now = datetime.now(timezone.utc)
+        daydiff = time.day - now.day
+        if time > now:
+            if daydiff == 0:
+                days = '今天'
+            elif daydiff == 1:
+                days = '明天'
+            else:
+                days = f'{daydiff} 天後'
+
+            return f'{days} {time.strftime("%H:%M")}'
+        else:
+            return 0
+            
+
+    def getResinMsg(data: models.Notes):
+        current_resin = data.current_resin
+        max_resin = data.max_resin
+        resin_recovery_time = getTime(data.resin_recovery_time)
+        if resin_recovery_time == 0:
+            resin_recovery_time = '樹脂已充滿'
+        else:
+            resin_recovery_time += ' 恢復'
+
+        return f'當前原粹樹脂：{current_resin} / {max_resin}\n{resin_recovery_time}'
+
+    def getRealmCurrencyMsg(data: models.Notes):
+        current_realm_currency = data.current_realm_currency
+        max_realm_currency = data.max_realm_currency
+        realm_currency_recovery_time = getTime(data.realm_currency_recovery_time)
+        if realm_currency_recovery_time == 0:
+            realm_currency_recovery_time = '洞天寶錢已充滿'
+        else:
+            realm_currency_recovery_time += ' 充滿'
+
+        return f'當前洞天寶錢：{current_realm_currency} / {max_realm_currency}\n{realm_currency_recovery_time}'
+    
+    def getCommissionsMsg(data: models.Notes):
+        remaining_commissions = data.max_commissions - data.completed_commissions
+        claimed_commission_reward = '已領取' if data.claimed_commission_reward else '未領取'
+        return f'每日委託任務：剩餘 {remaining_commissions} 個\n({claimed_commission_reward}獎勵)'
+
+    def getResin_DiscountsMsg(data: models.Notes):
+        return f'週本樹脂減半：剩餘 {data.remaining_resin_discounts} 次'
+
+    def getTransformerMsg(data: models.Notes):
+        if data.remaining_transformer_recovery_time.total_seconds() < 1:
+            msg = '可使用'
+        else:
+            msg = f'{data.remaining_transformer_recovery_time.days} 天 {data.remaining_transformer_recovery_time.hours} 小時 {data.remaining_transformer_recovery_time.minutes} 分 後充滿'
+        return f'參數質變儀　： {msg}'
+
+    def getExpeditionsMsg(data: models.Notes):
+        expeditionResult = []
+        expedition_finished_count = 0
+        for expedition in data.expeditions:
+            if expedition.finished:
+                expedition_finished_count += 1
+                expedition_finish_state = '已完成'
+            else:
+                expedition_finish_state = f'{getTime(expedition.completion_time)} 完成'
+
+            expeditionResult.append(f'　‧ {expedition.character.name}: {expedition_finish_state}')
+
+        title = f'探索派遣結果：{expedition_finished_count}/{data.max_expeditions}'
+        expeditionResult = '\n'.join(expeditionResult)
+        return f'{title}\n{expeditionResult}'
+
+    if(isDos(update)): return
+    client = getClient(update)
+    accounts = await client.get_game_accounts()
+    uid = accounts[0].uid
+    data = await client.get_genshin_notes(uid)
+    
+    await Send(update, [
+        getResinMsg(data),
+        getRealmCurrencyMsg(data),
+        getCommissionsMsg(data),
+        getResin_DiscountsMsg(data),
+        getTransformerMsg(data),
+        getExpeditionsMsg(data)
+    ])
+
 
 async def lang(update, bot):
     if(isDos(update)): return

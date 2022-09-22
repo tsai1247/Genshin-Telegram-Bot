@@ -1,4 +1,5 @@
 import sqlite3
+from typing import List
 from telegram import ForceReply
 
 def exe(command, value=None, commit = False):
@@ -31,12 +32,15 @@ def exe(command, value=None, commit = False):
             return ret
 
 async def Send(update, msg, forceReply = False):
-    if(forceReply):
-        await update.message.reply_text(msg, reply_markup = ForceReply(selective=forceReply))
+    if type(msg) is list:
+        for m in msg:
+            await update.message.reply_text(m)
     else:
-        await update.message.reply_text(msg)
+        if(forceReply):
+            await update.message.reply_text(msg, reply_markup = ForceReply(selective=forceReply))
+        else:
+            await update.message.reply_text(msg)
         
-
 def SendPhoto(update, photolink):
     update.message.reply_photo(photolink)
 

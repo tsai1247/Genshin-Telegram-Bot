@@ -19,6 +19,7 @@ def main():
     app.add_handler(CommandHandler('daily', daily))
     app.add_handler(CommandHandler('notice', notice))
     app.add_handler(CommandHandler('gift', gift))
+    app.add_handler(CommandHandler('note', note))
     app.add_handler(CommandHandler('lang', lang))
     app.add_handler(CommandHandler('hi', hi))
     app.add_handler(MessageHandler(filters.TEXT, getText))
