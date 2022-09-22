@@ -7,7 +7,7 @@ from telegram import Update
 
 class Language:
     languageMap = {'en': en(), 'zhTW': zhTW()}
-    displaywords: Lang = languageMap['zhTW']
+    displaywords = languageMap['zhTW']
 
     @staticmethod
     def Get(userID: int):

@@ -17,12 +17,14 @@ async def redeem_code(update, code):
         redeem_code(update, code)
         return
     else:
-        await Reply(update, "兌換成功")
+        await Reply(update, Language.displaywords.str_redeem_successful)
 
 def GetClient(update: Update):
     cookies = Cookie.Get(GetUserID(update))
-
-    client = genshin.Client(lang='zh-tw')
+    if type(Language.displaywords) is en:
+        client = genshin.Client(lang='en')
+    elif type(Language.displaywords) is zhTW:
+        client = genshin.Client(lang='zh-tw')
     client.set_cookies(cookies)
     client.default_game = genshin.Game.GENSHIN
     

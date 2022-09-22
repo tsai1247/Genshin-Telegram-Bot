@@ -51,6 +51,7 @@ class Lang():
     str_RedemptionInvalid = ''
     str_RedemptionException = ''
 
+    str_redeem_successful = ''
     str_AlreadyClaimed = ''
 
     str_switch_lang_success = ''
@@ -87,6 +88,7 @@ class zhTW(Lang):
 
     str_daily_successful = '今日簽到成功，獲得'
 
+    str_redeem_successful = "兌換成功."
     str_enter_redeem_code = '請輸入兌換碼'
 
     str_cookie_successful = 'cookie已更新'
@@ -280,6 +282,7 @@ class en(Lang):
     str_RedemptionInvalid = 'Invalid redemption code.'
     str_RedemptionException = 'Redemption failed.'
 
+    str_redeem_successful = "Successful."
     str_AlreadyClaimed = 'Today\'s reward has been claimed!'
     
     str_switch_lang_success = 'The language is switched to '
