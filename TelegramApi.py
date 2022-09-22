@@ -1,8 +1,17 @@
+import os
+from typing import List, Union
+
+from Language import Language
+
 from telegram import ForceReply
 from telegram import Update
-from typing import Union
+from telegram import InlineKeyboardMarkup, InlineKeyboardButton
+from telegram.ext import ApplicationBuilder
 
-async def Send(update: Update, msg: Union[list, str], forceReply: bool = False) -> None:
+app = ApplicationBuilder().token(os.getenv("TELEGRAM_TOKEN")).build()
+
+async def Reply(update: Update, msg: Union[list, str], forceReply: bool = False) -> None:
+    Language.SetLang(update)
     if type(msg) is list:
         for m in msg:
             await update.message.reply_text(m)
@@ -12,8 +21,22 @@ async def Send(update: Update, msg: Union[list, str], forceReply: bool = False) 
         else:
             await update.message.reply_text(msg)
         
-async def SendPhoto(update: Update, photolink: str) -> None:
+async def ReplyPhoto(update: Update, photolink: str) -> None:
     await update.message.reply_photo(photolink)
+
+async def ReplyButton(update: Update, title: str, buttonText = List[List[str]], replyText = List[List[str]]):
+    Language.SetLang(update)
+    buttonList = buttonText
+    for i in range(len(buttonList)):
+        for j in range(len(buttonList[i])):
+            buttonList[i][j] = InlineKeyboardButton(buttonText[i][j], callback_data = replyText[i][j]) 
+
+    await update.message.reply_text(title, reply_markup = InlineKeyboardMarkup(buttonList))
+
+async def Send(chat_id: int, msg: str):
+    Language.SetLang(chat_id)
+    return await app.bot.send_message(chat_id, msg)
+
 
 def GetUserID(update: Update) -> int:
     return update.message.from_user.id

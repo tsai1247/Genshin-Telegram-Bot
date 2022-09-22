@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 # coding=utf-8
 import logging
-import os
-from telegram.ext import CommandHandler, MessageHandler, CallbackQueryHandler, ApplicationBuilder, filters
-from Command import *
 from dotenv import load_dotenv
+
+from Command import *
+from TelegramApi import app
+
+from telegram.ext import CommandHandler, MessageHandler, CallbackQueryHandler, ApplicationBuilder, filters
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
 
 # Main
 def main():
-    app = ApplicationBuilder().token(os.getenv("TELEGRAM_TOKEN")).build()
-
+    
     # commands
     app.add_handler(CommandHandler('start', startbot))
     app.add_handler(CommandHandler('help', help))

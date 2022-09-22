@@ -2,7 +2,7 @@ import sqlite3
 
 class Cookie:
     @staticmethod
-    def Get(userID: str):
+    def Get(userID: int):
         sql = sqlite3.connect('KaTsu.db')
         cur = sql.cursor()
         cur.execute("select * from Cookie where userID = ?", [userID])
@@ -17,7 +17,7 @@ class Cookie:
         return data
 
     @staticmethod
-    def Set(ID: str, cookie: str):
+    def Set(ID: int, cookie: str):
         ltuid = cookie.split('ltuid=')[1].split(';')[0]
         ltoken = cookie.split('ltoken=')[1].split(';')[0]
         cookie_token = cookie.split('cookie_token=')[1].split(';')[0]

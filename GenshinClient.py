@@ -17,7 +17,7 @@ async def redeem_code(update, code):
         redeem_code(update, code)
         return
     else:
-        await Send(update, "兌換成功")
+        await Reply(update, "兌換成功")
 
 def GetClient(update: Update):
     cookies = Cookie.Get(GetUserID(update))

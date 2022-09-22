@@ -1,3 +1,4 @@
+from Language import Language
 from Security import isDos
 from Variable.String import *
 from TelegramApi import *
@@ -12,6 +13,7 @@ class UserStatus:
     # enum list
     SetCookie = 1
     RedeemCode = 2
+    Language = 3
     
     def GetKey(key: Union[Update, str]) -> int:
         if type(key) is Update:
@@ -39,51 +41,57 @@ class UserStatus:
 
 async def startbot(update: Update, bot):
     if(isDos(update)): return
-    await Send(update, str_welcome)
+    
+    await Reply(update, Language.displaywords.str_welcome)
 
 async def help(update: Update, bot):
     if(isDos(update)): return
-    await Send(update, str_help)
+    
+    await Reply(update, Language.displaywords.str_help)
 
 async def setcookie(update: Update, bot):
     if(isDos(update)): return
-    await Send(update, "請輸入你的cookie：", forceReply = True)
-    await Send(update, str_cookie_tutorial)
-    await Send(update, str_cookie_javascript_command)
+    
+    await Reply(update, Language.displaywords.str_enter_cookie, forceReply = True)
+    await Reply(update, Language.displaywords.str_cookie_tutorial)
+    await Reply(update, Language.displaywords.str_cookie_javascript_command)
     UserStatus.set(update, UserStatus.SetCookie)
 
 async def daily(update: Update, bot):
     if(isDos(update)): return
+    
     client = GetClient(update)
     reward = await client.claim_daily_reward(game=genshin.Game.GENSHIN)
-    await Send(update, f'今日簽到成功，獲得 {reward.amount}x {reward.name}！')
+    await Reply(update, f'{Language.displaywords.str_daily_successful} {reward.amount}x {reward.name}！')
 
 async def note(update: Update, bot):
     if(isDos(update)): return
+    
 
     client = GetClient(update)
     accounts = await client.get_game_accounts()
     uid = accounts[0].uid
     data = await client.get_genshin_notes(uid)
     
-    await Send(update, [
-        GetResinMsg(data),
-        GetRealmCurrencyMsg(data),
-        GetCommissionsMsg(data),
-        GetResin_DiscountsMsg(data),
-        GetTransformerMsg(data),
-        GetExpeditionsMsg(data)
+    await Reply(update, [
+        Language.displaywords.GetResinMsg(data),
+        Language.displaywords.GetRealmCurrencyMsg(data),
+        Language.displaywords.GetCommissionsMsg(data),
+        Language.displaywords.GetResin_DiscountsMsg(data),
+        Language.displaywords.GetTransformerMsg(data),
+        Language.displaywords.GetExpeditionsMsg(data)
     ])  
 
 async def gift(update: Update, bot):
-    await Send(update, "請輸入兌換碼", forceReply = True)
+    
+    await Reply(update, {Language.displaywords.str_enter_redeem_code}, forceReply = True)
     UserStatus.set(update, UserStatus.RedeemCode)
 
 async def hi(update: Update, bot):
     try:
-        await Send(update, f"hi, {update.message.from_user.name}")
+        await Reply(update, f"hi, {update.message.from_user.name}")
     except:
-        await Send(update, f"hi, {update.message.from_user.first_name}")
+        await Reply(update, f"hi, {update.message.from_user.first_name}")
     
 async def notice(update: Update, bot):
     if(isDos(update)): return
@@ -95,14 +103,21 @@ async def setaccount(update: Update, bot):
 
 async def lang(update: Update, bot):
     if(isDos(update)): return
-    NotImplemented()
+    
+    userID = GetUserID(update)
+    await ReplyButton(update, title = f'{Language.displaywords.str_current_lang}{Language.Get(userID)}', 
+        buttonText = [['中文', 'English']], 
+        replyText = [[f'{UserStatus.Language}\\{userID}\\zhTW', f'{UserStatus.Language}\\{userID}\\en']]
+    )
+    
 
 async def getText(update: Update, bot):
     if(isDos(update)): return
+    
     if UserStatus.get(update) == UserStatus.SetCookie:
         cookie = update.message.text
         Cookie.Set(GetUserID(update), cookie)
-        await Send(update, "cookie已更新")
+        await Reply(update, Language.displaywords.str_cookie_successful)
         UserStatus.delete(update)
         
     elif UserStatus.get(update) == UserStatus.RedeemCode:
@@ -111,6 +126,8 @@ async def getText(update: Update, bot):
         UserStatus.delete(update)
         
 async def callback(update: Update, bot):
-    if(isDos(update)): return
-    # text, userID = update.callback_query.data.split(" ")
-    NotImplemented()
+    status, userID, text = update.callback_query.data.split("\\")
+    
+    if int(status) == UserStatus.Language:
+        Language.Set(int(userID), text)
+        await Send(int(userID), f"{Language.displaywords.str_switch_lang_success}{text}")
