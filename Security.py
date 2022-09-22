@@ -1,19 +1,16 @@
-# from functions.variable import dos_defence, penalty, dos_maximum
 from Config import *
+from TelegramApi import GetUserID
+from telegram import Update
+from datetime import timedelta
 
 dos_defence = {}
 penalty = Config.Get('penalty')
 dos_maximum = Config.Get('dos_maximum')
 
-def reload():
-    penalty = Config.Get('penalty')
-    dos_maximum = Config.Get('dos_maximum')
-
-
-def isDos(update):
+def isDos(update: Update):
     if update.message.from_user.id != update.message.chat.id:
         return True
-    chat_id = getID(update)
+    chat_id = GetUserID(update)
     date = update.message.date
 
     if chat_id not in dos_defence:
@@ -22,7 +19,8 @@ def isDos(update):
         
     count = dos_defence[chat_id][0]
     lasttime = dos_defence[chat_id][1]
-    during = (date-lasttime).total_seconds()
+    during: timedelta = date - lasttime
+    during = during.total_seconds()
 
     if count==-1:
         if during>penalty:
@@ -30,7 +28,6 @@ def isDos(update):
             return False
         else:
             dos_defence.update({chat_id : [-1, date]})
-            print('a')
             return True
     elif during>60:
         dos_defence.update({chat_id : [1, date]})
@@ -40,8 +37,11 @@ def isDos(update):
         return False
     else:
         dos_defence.update({chat_id : [-1, date]})
-        print('b')
         return True
 
-def getID(update):
-    return str(update.message.from_user.id)
+# def isAttack(text):
+#     if '*' in text or '?' in text or '%' in text or '+' in text or '_' in text:
+#         return True
+#     if "\"" in text or '\'' in text:
+#         return True
+#     return False

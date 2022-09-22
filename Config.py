@@ -4,13 +4,13 @@ class Config:
     def Get(name: str):
         sql = sqlite3.connect('KaTsu.db')
         cur = sql.cursor()
-        cur.execute("select Val from Config where Name = '{0}'".format(name))
+        cur.execute("select Val from Config where Name = ?", [name])
         data = cur.fetchone()
-        if(data == None or len(data)==0 ):  # init
+        if(data == None):  # init
             initVal = 20
             cur.close()
             cur = sql.cursor()
-            cur.execute("insert into Config values('{0}', {1})".format(name, initVal))
+            cur.execute("insert into Config values(?, ?)", [name, initVal])
             sql.commit()
             data = initVal
         else:
