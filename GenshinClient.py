@@ -21,7 +21,8 @@ async def redeem_code(update, code):
 
 def GetClient(update: Update):
     cookies = Cookie.Get(GetUserID(update))
-
+    if cookies == None:
+        raise genshin.errors.InvalidCookies
     client = genshin.Client(lang='zh-tw')
     client.set_cookies(cookies)
     client.default_game = genshin.Game.GENSHIN

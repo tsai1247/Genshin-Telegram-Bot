@@ -1,4 +1,5 @@
 import logging
+from urllib.error import HTTPError
 
 from TelegramApi import *
 from Language import Language
@@ -6,6 +7,7 @@ from Variable.String import *
 
 from telegram.ext._callbackcontext import CallbackContext
 import genshin
+import logging
 
 async def error_handler(update: Update, context: CallbackContext) -> None:
         # about cookie
@@ -33,7 +35,24 @@ async def error_handler(update: Update, context: CallbackContext) -> None:
             logging.info(f"[例外]: [retcode]{context.error.retcode} [原始內容]{context.error.original} [錯誤訊息]{context.error.msg}")
         elif type(context.error) is genshin.errors.GenshinException:
             logging.warning(f"[例外]: [retcode]{context.error.retcode} [原始內容]{context.error.original} [錯誤訊息]{context.error.msg}")
+        elif type(context.error) is HTTPError:
+            pass
         else:
             logging.warning(f"[例外]: [錯誤訊息]{context.error}")
         
+def appendlog(update: Union[Update, int], msg: Union[str, None] = None):
+    if type(update) is Update:
+        try:
+            name = update.message.from_user.name
+        except:
+            name = update.message.from_user.full_name
+
+        id = update.message.from_user.id
+    else:
+        name = r'{unknown}'
+        id = update
+
+    if msg == None:
+        msg = update.message.text
         
+    logging.info(f"[id]{id} [name]{name} [msg]\"{msg}\"")
