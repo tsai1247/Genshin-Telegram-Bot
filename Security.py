@@ -2,6 +2,9 @@ from Config import *
 from TelegramApi import GetUserID
 from telegram import Update
 from datetime import timedelta
+from dotenv import load_dotenv
+
+load_dotenv()
 
 dos_defence = {}
 penalty = Config.Get('penalty')

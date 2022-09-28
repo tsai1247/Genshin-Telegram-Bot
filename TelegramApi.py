@@ -7,6 +7,9 @@ from telegram import ForceReply
 from telegram import Update
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ApplicationBuilder
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = ApplicationBuilder().token(os.getenv("TELEGRAM_TOKEN")).build()
 
