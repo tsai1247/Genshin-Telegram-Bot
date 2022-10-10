@@ -1,4 +1,5 @@
 import asyncio
+import shlex
 from subprocess import Popen
 from Language import Language
 from Logger import appendlog
@@ -156,7 +157,7 @@ async def math(update: Update, bot):
         fw = open('solution.txt', 'w')
         fw.write(text)
         fw.close()
-        a = Popen('python Math.py')
+        a = Popen(shlex.split('python Math.py'))
 
         timeout = 10
         for cnt in range(timeout):

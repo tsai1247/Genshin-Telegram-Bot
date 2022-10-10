@@ -1,4 +1,3 @@
-from func_timeout import *
 import math
 
 def CalculateWithTimeout():
