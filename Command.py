@@ -1,5 +1,9 @@
+import asyncio
+from subprocess import Popen
 from Language import Language
+from Logger import appendlog
 from Security import isDos
+from Variable.Sticker import Sticker
 from Variable.String import *
 from TelegramApi import *
 from Cookie import *
@@ -139,8 +143,50 @@ async def getText(update: Update, bot):
         code = update.message.text
         await redeem_code(update, code)
         UserStatus.delete(update)
-        
-        
+
+async def math(update: Update, bot):
+    appendlog(update)
+    sensitiveList = ['\'', '\"', 'exec', 'eval', 'os', 'import', 'sys', 'app', 'ID', 'Send', 'Reply']
+    try:
+        text = ' '.join(update.message.text.split()[1:])
+        for i in sensitiveList:
+            if i.lower() in text.lower():
+                await Reply(update, "這不是數學")
+                return
+        fw = open('solution.txt', 'w')
+        fw.write(text)
+        fw.close()
+        a = Popen('python Math.py')
+
+        timeout = 10
+        for cnt in range(timeout):
+            await asyncio.sleep(0.5)
+            fr = open('solution.txt', 'r')
+            sol = fr.readline()
+            fr.close()
+            if sol == text :
+                if cnt+1 == timeout:
+                    await Reply(update, "我算不出來")
+                    a.kill()
+                    break
+                else:
+                    continue
+            else:
+                sol = sol[1:]
+                if len(sol) == 0:
+                    await ReplySticker(update, Sticker.Capoo_Question)
+                    break
+                elif len(sol) > text_limit:
+                    await Reply(update, "答案太長了")
+                    break
+                else:
+                    await Reply(update, sol)
+                    break
+    except Exception as e:
+        print(e)
+        await Reply(update, "我不會數學")
+
+
 async def callback(update: Update, bot):
     status, userID, text = update.callback_query.data.split("\\")
     appendlog(int(userID), 'call back (button clicked)')
@@ -149,4 +195,3 @@ async def callback(update: Update, bot):
 
         Language.Set(int(userID), text)
         await Send(int(userID), f"{Language.displaywords.str_switch_lang_success}{text}")
-        

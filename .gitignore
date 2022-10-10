@@ -13,3 +13,4 @@ config.json
 .vscode
 *.db
 .env
+*.txt

@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = ApplicationBuilder().token(os.getenv("TELEGRAM_TOKEN")).build()
+text_limit = 4000
 
 async def Reply(update: Update, msg: Union[list, str], forceReply: bool = False) -> None:
     Language.SetLang(update)
@@ -36,6 +37,9 @@ async def ReplyButton(update: Update, title: str, buttonText = List[List[str]], 
 
     await update.message.reply_text(title, reply_markup = InlineKeyboardMarkup(buttonList))
 
+async def ReplySticker(update: Update, file_id: str) -> None:
+    await update.message.reply_sticker(file_id)
+    
 async def Send(chat_id: int, msg: str):
     Language.SetLang(chat_id)
     return await app.bot.send_message(chat_id, msg)
