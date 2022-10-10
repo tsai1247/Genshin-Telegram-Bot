@@ -123,7 +123,7 @@ class zhTW(Lang):
         current_realm_currency = data.current_realm_currency
         max_realm_currency = data.max_realm_currency
         realm_currency_recovery_time = self.getStrftime(data.realm_currency_recovery_time)
-        if realm_currency_recovery_time == 0:
+        if realm_currency_recovery_time == None:
             realm_currency_recovery_time = '洞天寶錢已充滿'
         else:
             realm_currency_recovery_time += ' 充滿'
@@ -238,7 +238,7 @@ class en(Lang):
         current_realm_currency = data.current_realm_currency
         max_realm_currency = data.max_realm_currency
         realm_currency_recovery_time = self.getStrftime(data.realm_currency_recovery_time)
-        if realm_currency_recovery_time == 0:
+        if realm_currency_recovery_time == None:
             realm_currency_recovery_time = 'Realm Currency is full.'
         else:
             realm_currency_recovery_time = f'Realm Currency will be full at {realm_currency_recovery_time}'
