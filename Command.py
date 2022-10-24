@@ -96,7 +96,7 @@ async def note(update: Update, bot):
 async def gift(update: Update, bot):    
     if(isDos(update)): return
     appendlog(update)
-    await Reply(update, {Language.displaywords.str_enter_redeem_code}, forceReply = True)
+    await Reply(update, Language.displaywords.str_enter_redeem_code, forceReply = True)
     UserStatus.set(update, UserStatus.RedeemCode)
     
 
@@ -152,7 +152,7 @@ async def math(update: Update, bot):
         text = ' '.join(update.message.text.split()[1:])
         for i in sensitiveList:
             if i.lower() in text.lower():
-                await Reply(update, "這不是數學")
+                await Send(GetUserID(update), "這不是數學")
                 return
         fw = open('solution.txt', 'w')
         fw.write(text)
@@ -167,7 +167,7 @@ async def math(update: Update, bot):
             fr.close()
             if sol == text :
                 if cnt+1 == timeout:
-                    await Reply(update, "我算不出來")
+                    Send(GetUserID(update), "我算不出來")
                     a.kill()
                     break
                 else:
@@ -178,14 +178,14 @@ async def math(update: Update, bot):
                     await ReplySticker(update, Sticker.Capoo_Question)
                     break
                 elif len(sol) > text_limit:
-                    await Reply(update, "答案太長了")
+                    await Send(GetUserID(update), "答案太長了")
                     break
                 else:
-                    await Reply(update, sol)
+                    await Send(GetUserID(update), sol)
                     break
     except Exception as e:
         print(e)
-        await Reply(update, "我不會數學")
+        await Send(GetUserID(update), "我不會數學")
 
 
 async def callback(update: Update, bot):
