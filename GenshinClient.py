@@ -21,8 +21,12 @@ async def redeem_code(update: Update, code: str):
     else:
         await Reply(update, f"{Language.displaywords.str_redeem_successful}: {code}")
 
-def GetClient(update: Update):
-    cookies = Cookie.Get(GetUserID(update))
+def GetClient(update: Union[Update, int]):
+    if type(update) is Update:
+        userID = GetUserID(update)
+    else:
+        userID = update
+    cookies = Cookie.Get(userID)
     client = genshin.Client(lang='en-us')
 
     client.set_cookies(cookies)

@@ -1,6 +1,7 @@
 import asyncio
 import shlex
 from subprocess import Popen
+from Daily import Daily
 from Language import Language
 from Logger import appendlog
 
@@ -41,8 +42,11 @@ async def daily(update: Update, bot):
 
     client = GetClient(update)
     reward = await client.claim_daily_reward(game=genshin.Game.GENSHIN)
-    await Reply(update, f'{Language.displaywords.str_daily_successful} {reward.amount}x {reward.name}！')
-    
+    buttonTexts = ['open', 'close']
+    await ReplyButton(update, f'{Language.displaywords.str_daily_successful} {reward.amount}x {reward.name}！', 
+        [buttonTexts], 
+        [[f'{UserStatus.SetDaily} {GetUserID(update)} {i}' for i in buttonTexts]], 
+    )
 
 async def note(update: Update, bot):
     if(isDos(update)): return
@@ -166,12 +170,11 @@ async def math(update: Update, bot):
         print(e)
         await Send(GetUserID(update), "我不會數學")
 
-
 async def callback(update: Update, bot):
-    status, userID, text = update.callback_query.data.split("\\")
+    status, userID, text = update.callback_query.data.split()
     appendlog(int(userID), 'call back (button clicked)')
-    if int(status) == UserStatus.Language:
-        appendlog(int(userID), 'switch language')
-
-        Language.Set(int(userID), text)
-        await Send(int(userID), f"{Language.displaywords.str_switch_lang_success}{text}")
+    if int(status) == UserStatus.SetDaily:
+        autoDaily = 1 if (text == 'open') else 0
+        appendlog(int(userID), 'switch daily')
+        Daily.Set(userID, autoDaily)
+        await Send(int(userID), f"auto-claim the daily rewards: {text}")

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # coding=utf-8
 import logging
+import threading
 from dotenv import load_dotenv
 
 from Command import *
@@ -11,8 +12,15 @@ from telegram.ext import CommandHandler, MessageHandler, CallbackQueryHandler, A
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
 
+def AutoClaim_loop():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(Daily.AutoClaim())
+    loop.close()
+
 # Main
 def main():
+    threading.Thread(target= AutoClaim_loop).start()
     
     # commands
     app.add_handler(CommandHandler('start', startbot))

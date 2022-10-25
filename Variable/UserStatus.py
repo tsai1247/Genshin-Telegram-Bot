@@ -10,7 +10,7 @@ class UserStatus:
     # enum list
     SetCookie = 1
     RedeemCode = 2
-    Language = 3
+    SetDaily = 3
     
     def GetKey(key: Union[Update, str]) -> int:
         if type(key) is Update:

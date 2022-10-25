@@ -110,6 +110,7 @@ class en():
 
     # error message
     str_InvalidCookies = 'Invalid cookie, please get a new one from Hoyolab.'
+    str_InvalidCookies_when_Daiily = 'Invalid cookie when claim daily reward. please get a new one from Hoyolab.'
     str_RedemptionClaimed = 'The code has been used.'
     str_RedemptionInvalid = 'Invalid redemption code.'
     str_RedemptionException = 'Redemption failed.'
@@ -117,5 +118,3 @@ class en():
     str_redeem_successful = "Successful."
     str_AlreadyClaimed = 'Today\'s reward has been claimed!'
     
-    str_switch_lang_success = 'The language is switched to '
-    str_current_lang = 'Current language: '

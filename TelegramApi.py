@@ -39,7 +39,10 @@ async def ReplySticker(update: Update, file_id: str) -> None:
     await update.message.reply_sticker(file_id)
     
 async def Send(chat_id: int, msg: str):
-    return await app.bot.send_message(chat_id, msg)
+    try:
+        await app.bot.send_message(chat_id, msg)
+    except:
+        pass
 
 
 def GetUserID(update: Update) -> int:

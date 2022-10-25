@@ -18,7 +18,11 @@ async def error_handler(update: Update, context: CallbackContext) -> None:
 
         # about daily reward
         elif type(context.error) is genshin.errors.AlreadyClaimed:
-            await Reply(update, Language.displaywords.str_AlreadyClaimed)
+            buttonTexts = ['open', 'close']
+            await ReplyButton(update, Language.displaywords.str_AlreadyClaimed, 
+                [buttonTexts], 
+                [[f'{UserStatus.SetDaily} {GetUserID(update)} {i}' for i in buttonTexts]], 
+            )
 
         # others
         elif type(context.error) is genshin.errors.DataNotPublic:
