@@ -24,7 +24,6 @@ def main():
     app.add_handler(CommandHandler('hi', hi))
     app.add_handler(CommandHandler('notice', notice))
     app.add_handler(CommandHandler('account', setaccount))
-    app.add_handler(CommandHandler('lang', lang))
     app.add_handler(CommandHandler('math', math))
     
     # when getting a text without command

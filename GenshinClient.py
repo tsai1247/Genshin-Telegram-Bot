@@ -1,4 +1,5 @@
 from asyncio import sleep
+import asyncio
 
 import genshin
 from genshin.client.components.base import *
@@ -7,24 +8,23 @@ from TelegramApi import *
 from Cookie import *
 from ErrorHandler import *
 
-async def redeem_code(update, code):
+async def redeem_code(update: Update, code: str):
     client = GetClient(update)
     uid = await GetUid(client)
     try:
         await client.redeem_code(code, uid)
     except genshin.RedemptionCooldown:
-        sleep(1.2)
-        redeem_code(update, code)
+        await Reply(update, Language.displaywords.str_redeem_cooldown_waiting)
+        await asyncio.sleep(3.2)
+        await client.redeem_code(code, uid)
         return
     else:
-        await Reply(update, Language.displaywords.str_redeem_successful)
+        await Reply(update, f"{Language.displaywords.str_redeem_successful}: {code}")
 
 def GetClient(update: Update):
     cookies = Cookie.Get(GetUserID(update))
-    if type(Language.displaywords) is en:
-        client = genshin.Client(lang='en')
-    elif type(Language.displaywords) is zhTW:
-        client = genshin.Client(lang='zh-tw')
+    client = genshin.Client(lang='en-us')
+
     client.set_cookies(cookies)
     client.default_game = genshin.Game.GENSHIN
     

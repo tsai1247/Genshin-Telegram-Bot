@@ -1,4 +1,5 @@
 import sqlite3
+import genshin
 
 class Cookie:
     @staticmethod
@@ -8,7 +9,7 @@ class Cookie:
         cur.execute("select * from Cookie where userID = ?", [userID])
         data = cur.fetchone()
         if(data == None):
-            data = None
+            raise genshin.errors.InvalidCookies
         else:
             data = {'ltuid': data[1], 'ltoken': data[2], 'cookie_token': data[3], 'account_id': data[4]}
         cur.close()

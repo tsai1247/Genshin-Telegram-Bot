@@ -3,46 +3,16 @@ import shlex
 from subprocess import Popen
 from Language import Language
 from Logger import appendlog
+
 from Security import isDos
 from Variable.Sticker import Sticker
 from Variable.String import *
+from Variable.UserStatus import UserStatus
 from TelegramApi import *
 from Cookie import *
 from GenshinClient import *
 
 import genshin
-
-class UserStatus:
-    statusList = {}
-
-    # enum list
-    SetCookie = 1
-    RedeemCode = 2
-    Language = 3
-    
-    def GetKey(key: Union[Update, str]) -> int:
-        if type(key) is Update:
-            key = GetUserID(key)
-        return key
-
-    @staticmethod
-    def set(key: Union[Update, int], value: int) -> None:
-        key = UserStatus.GetKey(key)
-        UserStatus.statusList[key] = value
-
-    @staticmethod
-    def get(key) -> int:
-        key = UserStatus.GetKey(key)
-        if key in UserStatus.statusList:
-            return UserStatus.statusList[key]
-        else:
-            return None
-
-    @staticmethod
-    def delete(key) -> None:
-        key = UserStatus.GetKey(key)
-        if key in UserStatus.statusList:
-            del UserStatus.statusList[key]
 
 async def startbot(update: Update, bot):
     if(isDos(update)): return
@@ -116,18 +86,12 @@ async def setaccount(update: Update, bot):
     if(isDos(update)): return
     NotImplemented()
 
-async def lang(update: Update, bot):
-    if(isDos(update)): return
-    appendlog(update)
-
-    userID = GetUserID(update)
-    await ReplyButton(update, title = f'{Language.displaywords.str_current_lang}{Language.Get(userID)}', 
-        buttonText = [['中文', 'English']], 
-        replyText = [[f'{UserStatus.Language}\\{userID}\\zhTW', f'{UserStatus.Language}\\{userID}\\en']]
-    )
-    
-
 async def getText(update: Update, bot):
+    def getCode(text: str):
+        candidates = text.split()
+        ret = filter(lambda x: x.isalnum(), candidates)
+        return list(ret)
+
     if(isDos(update)): return
     appendlog(update)
 
@@ -141,8 +105,23 @@ async def getText(update: Update, bot):
 
     elif UserStatus.get(update) == UserStatus.RedeemCode:
         appendlog(update, 'redeemCode')
-        code = update.message.text
-        await redeem_code(update, code)
+        text = update.message.text
+        codeList = getCode(text)
+        print(codeList)
+        for i in range(len(codeList)):
+            code = codeList[i]
+            if i != 0:            
+                await asyncio.sleep(3.5)
+            try:
+                await redeem_code(update, code)
+            except genshin.RedemptionClaimed:
+                await Reply(update, + f"{Language.displaywords.str_RedemptionClaimed}: {code}")
+            except genshin.RedemptionInvalid:
+                await Reply(update, f"{Language.displaywords.str_RedemptionInvalid}: {code}")
+            except genshin.RedemptionException as e:
+                await Reply(update, f"{Language.displaywords.str_RedemptionException}: {code}")
+                logging.info(f'[retcode]{e.retcode} [內容]{e.original}')
+
         UserStatus.delete(update)
 
 async def math(update: Update, bot):
