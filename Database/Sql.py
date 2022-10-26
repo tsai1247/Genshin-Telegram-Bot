@@ -43,7 +43,7 @@ class Sql:
             keyfield = "True"
         else:
             keyfield = ' = ? and '.join(keyfield) + ' = ?'
-        targetfield = ' = ? and '.join(targetfield) + ' = ?'
+        targetfield = ' = ?, '.join(targetfield) + ' = ?'
         
 
         sql = sqlite3.connect(database_path)
