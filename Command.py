@@ -3,6 +3,8 @@ import json
 import shlex
 from subprocess import Popen
 from typing import Dict
+
+from telegram import Message
 from Database.Daily import Daily
 from Language import Language
 from Logger import appendlog
@@ -113,11 +115,12 @@ async def getText(update: Update, bot):
     elif UserStatus.get(update) == UserStatus.RedeemCode:
         appendlog(update, 'redeemCode')
         text = update.message.text
+        userID = GetUserID(update)
         codeList = getRedeemCode(text)
         for code in codeList:
-            await Reply(update, f'Redeeming {code}: ')
-            msg = await Redeem_Code(update, code)
-            await Reply(update, msg)
+            message: Message = await Send(userID , f'Redeeming {code}: ')
+            text = await Redeem_Code(update, code)
+            await EditText(message, f"{message.text}\n{text}")
 
         UserStatus.delete(update)
 

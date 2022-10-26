@@ -38,7 +38,7 @@ async def redeem_code(client: Client, code, attemptTime = 8)-> str:
             except genshin.RedemptionException:
                 msg = Language.displaywords.str_RedemptionException
                 break
-        msgList.append(f'UID {uid}: {msg}')
+        msgList.append(f'  UID {uid}: {msg}')
 
     timer = datetime.now()
     return '\n'.join(msgList)

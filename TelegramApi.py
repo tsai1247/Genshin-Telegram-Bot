@@ -1,9 +1,7 @@
 import os
 from typing import List, Union
 
-from Language import Language
-
-from telegram import ForceReply
+from telegram import ForceReply, Message
 from telegram import Update
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ApplicationBuilder
@@ -17,33 +15,43 @@ text_limit = 4000
 async def Reply(update: Update, msg: Union[list, str], forceReply: bool = False) -> None:
     if type(msg) is list:
         for m in msg:
-            await update.message.reply_text(m)
+            replyMsg = await update.message.reply_text(m)
     else:
         if(forceReply):
-            await update.message.reply_text(msg, reply_markup = ForceReply(selective=forceReply))
+            replyMsg = await update.message.reply_text(msg, reply_markup = ForceReply(selective=forceReply))
         else:
-            await update.message.reply_text(msg)
-        
+            replyMsg = await update.message.reply_text(msg)
+    return replyMsg
+
 async def ReplyPhoto(update: Update, photolink: str) -> None:
-    await update.message.reply_photo(photolink)
+    replyMsg = await update.message.reply_photo(photolink)
+    return replyMsg
 
 async def ReplyButton(update: Update, title: str, buttonText = List[List[str]], replyText = List[List[str]]):
+    
     buttonList = buttonText
     for i in range(len(buttonList)):
         for j in range(len(buttonList[i])):
             buttonList[i][j] = InlineKeyboardButton(buttonText[i][j], callback_data = replyText[i][j]) 
 
-    await update.message.reply_text(title, reply_markup = InlineKeyboardMarkup(buttonList))
+    replyMsg = await update.message.reply_text(title, reply_markup = InlineKeyboardMarkup(buttonList))
+    return replyMsg
 
 async def ReplySticker(update: Update, file_id: str) -> None:
-    await update.message.reply_sticker(file_id)
+    replyMsg = await update.message.reply_sticker(file_id)
+    return replyMsg
     
 async def Send(chat_id: int, msg: str):
     if type(msg) is list:
         for m in msg:
-            await app.bot.send_message(chat_id, m)
+            replyMsg = await app.bot.send_message(chat_id, m)
     else:
-        await app.bot.send_message(chat_id, msg)
+        replyMsg = await app.bot.send_message(chat_id, msg)
+    return replyMsg
+
+async def EditText(message: Message, text: str):
+    await message.edit_text(text)
+    return message
 
 def GetUserID(update: Update) -> int:
     return update.message.from_user.id
