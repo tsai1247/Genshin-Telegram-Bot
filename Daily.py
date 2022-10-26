@@ -66,7 +66,7 @@ class Daily:
                 try:
                     client = GetClient(userID)
                     reward = await client.claim_daily_reward(game=genshin.Game.GENSHIN)
-                    Send(userID, f'{Language.displaywords.str_daily_successful} {reward.amount}x {reward.name}！')
+                    await Send(userID, f'{Language.displaywords.str_daily_successful} {reward.amount}x {reward.name}！')
                 except genshin.errors.InvalidCookies as e:
                     await Send(userID, Language.displaywords.str_InvalidCookies_when_Daiily)
                     logging.info(f"[例外]: [retcode]{e.retcode} [原始內容]{e.original} [錯誤訊息]{e.msg}")
