@@ -3,7 +3,7 @@ import json
 import shlex
 from subprocess import Popen
 from typing import Dict
-from Daily import Daily
+from Database.Daily import Daily
 from Language import Language
 from Logger import appendlog
 
@@ -12,7 +12,7 @@ from Variable.Sticker import Sticker
 from Variable.String import *
 from Variable.UserStatus import UserStatus
 from TelegramApi import *
-from Cookie import *
+from Database.Cookie import *
 from GenshinClient import *
 
 import genshin

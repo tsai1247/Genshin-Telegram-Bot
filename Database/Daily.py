@@ -1,60 +1,42 @@
 import asyncio
 from datetime import datetime
 import logging
-import sqlite3
 import genshin
+from Database.Sql import Sql
 
 from GenshinClient import GetClient
 from Language import Language
 from TelegramApi import Send
 
 class Daily:
+    tablename = 'Daily'
+
     @staticmethod
     def Get(userID: int):
-        sql = sqlite3.connect('KaTsu.db')
-        cur = sql.cursor()
-        cur.execute("select * from Daily where userID = ?", [userID])
-        data = cur.fetchone()
-        if(data == None):
+        data = Sql.select(Daily.tablename, keyfield=['userID'], keyvalue=[userID])
+
+        if len(data) == 0:
             data = {'autoDaily': 0}
         else:
-            data = {'autoDaily': data[1]}
-        cur.close()
-        sql.close()
+            data = {'autoDaily': data[0][1]}
 
         return data
 
     @staticmethod
     def GetAll(autoDaily = 1):
-        sql = sqlite3.connect('KaTsu.db')
-        cur = sql.cursor()
-        cur.execute("select * from Daily where autoDaily = ?", [autoDaily])
-        data = cur.fetchall()
-        cur.close()
-        sql.close()
+        data = Sql.select(Daily.tablename, keyfield=['autoDaily'], keyvalue=[autoDaily])
 
         data = [i[0] for i in data]
         return data
 
     @staticmethod
-    def Set(ID: int, autoDaily: int):
-        sql = sqlite3.connect('KaTsu.db')
-        cur = sql.cursor()
-        cur.execute("select userID from Daily where userID = ?", [ID])
-        data = cur.fetchone()
-        if(data == None):   # insert
-            cur.close()
-            cur = sql.cursor()
-            cur.execute("insert into Daily values(?, ?)", [ID, autoDaily])
-            sql.commit()
+    def Set(userID: int, autoDaily: int):
+        data = Sql.select(Daily.tablename, keyfield=['userID'], keyvalue=[userID])
+
+        if len(data) == 0:   # insert
+            Sql.insert(Daily.tablename, keyvalue=[userID, autoDaily])
         else:               # update
-            cur.close()
-            cur = sql.cursor()
-            cur.execute("update Daily set autoDaily = ? \
-                         where userID = ?", [autoDaily, ID])
-            sql.commit()
-        cur.close()
-        sql.close()
+            Sql.update(Daily.tablename, keyfield=['userID'], keyvalue=[userID], targetfield=['autoDaily'], targetvalue=[autoDaily])
 
     @staticmethod
     async def AutoClaim(hour=4, minute=1, second = 0):
@@ -78,7 +60,7 @@ class Daily:
                 except genshin.errors.InvalidCookies as e:
                     await Send(userID, Language.displaywords.str_InvalidCookies_when_Daiily)
                     logging.info(f"[例外]: [retcode]{e.retcode} [原始內容]{e.original} [錯誤訊息]{e.msg}")
-                except genshin.errors.AlreadyClaimed as e:
+                except genshin.errors.AlreadyClaimed:
                     await Send(userID, Language.displaywords.str_AlreadyClaimed)
 
 

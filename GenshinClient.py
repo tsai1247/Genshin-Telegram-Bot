@@ -6,7 +6,7 @@ from genshin import Client
 from genshin.client.components.base import *
 
 from TelegramApi import *
-from Cookie import *
+from Database.Cookie import *
 from ErrorHandler import *
 
 async def redeem_code(update: Update, code: str):

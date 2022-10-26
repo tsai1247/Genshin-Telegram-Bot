@@ -1,4 +1,4 @@
-from Config import *
+from Database.Config import *
 from TelegramApi import GetUserID
 from telegram import Update
 from datetime import timedelta
