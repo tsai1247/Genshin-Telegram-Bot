@@ -1,64 +1,53 @@
-from typing import List
+from typing import Sequence
 import asyncio
 
 import genshin
 from genshin import Client
 from genshin.client.components.base import *
+from genshin.models import GenshinAccount
 
 from TelegramApi import *
 from Database.Cookie import *
 from ErrorHandler import *
 
-async def redeem_code(update: Update, code: str):
-    client = GetClient(update)
-    uid = await GetUid(client)
-    try:
-        await client.redeem_code(code, uid)
-    except genshin.RedemptionCooldown:
-        await Reply(update, Language.displaywords.str_redeem_cooldown_waiting)
-        await asyncio.sleep(3.2)
-        await client.redeem_code(code, uid)
-        return
-    else:
-        await Reply(update, f"{Language.displaywords.str_redeem_successful}: {code}")
-
 timer = datetime.now()
 async def redeem_code(client: Client, code, attemptTime = 8)-> str: 
     global timer
-    await asyncio.sleep(4 - (datetime.now() - timer).seconds)
+    cooldowntime = 5
+    await asyncio.sleep(cooldowntime - (datetime.now() - timer).seconds)
 
-    uid = await GetUid(client)
-    msg = Language.displaywords.str_RedemptionException
-    for _attempt in range(attemptTime):
-        try:
-            await client.redeem_code(code, uid)
-            msg = Language.displaywords.str_redeem_successful
-        except genshin.RedemptionCooldown:
-            await asyncio.sleep(1)
-            continue
-        except genshin.RedemptionClaimed:
-            msg = Language.displaywords.str_RedemptionClaimed
-            break
-        except genshin.RedemptionInvalid:
-            msg = Language.displaywords.str_RedemptionInvalid
-            break
-        except genshin.RedemptionException:
-            msg = Language.displaywords.str_RedemptionException
-            break
+    uidList = await GetUid(client)
+
+    msgList = []
+    for uid in uidList:
+        msg = Language.displaywords.str_RedemptionException
+        for _attempt in range(attemptTime):
+            try:
+                await client.redeem_code(code, uid)
+                msg = Language.displaywords.str_redeem_successful
+                break
+            except genshin.RedemptionCooldown:
+                await asyncio.sleep(1)
+                continue
+            except genshin.RedemptionClaimed:
+                msg = Language.displaywords.str_RedemptionClaimed
+                break
+            except genshin.RedemptionInvalid:
+                msg = Language.displaywords.str_RedemptionInvalid
+                break
+            except genshin.RedemptionException:
+                msg = Language.displaywords.str_RedemptionException
+                break
+        msgList.append(f'UID {uid}: {msg}')
 
     timer = datetime.now()
-    return msg
+    return '\n'.join(msgList)
 
-async def Redeem_Code(update: Update, codeList: List[str]):
+async def Redeem_Code(update: Update, code: str):
     global timer
-    msg = []
-    for i in range(len(codeList)):
-        code = codeList[i]    
-        client = GetClient(update)
-        msg.append(await redeem_code(client, code))
+    client = GetClient(update)
+    msg = await redeem_code(client, code)
     return msg
-
-
 
 async def Claim_Daily_Reward(update: Update):
     try:
@@ -72,10 +61,10 @@ async def Claim_Daily_Reward(update: Update):
 
     return msg
 
-async def Get_Genshin_Notes(update: Update):
+async def Get_Genshin_Notes(update: Update, server: str):
     client = GetClient(update)
-    uid = await GetUid(client)
-    data = await client.get_genshin_notes(uid)
+    uid = await GetUid(client, server)
+    data: Notes = await client.get_genshin_notes(uid)
     msg = [
         Language.displaywords.GetResinMsg(data),
         Language.displaywords.GetRealmCurrencyMsg(data),
@@ -98,11 +87,25 @@ def GetClient(update: Union[Update, int]):
     client.set_cookies(cookies)
     client.default_game = genshin.Game.GENSHIN
     
-    # accounts = await client.get_game_accounts()
-    # data = await client.get_genshin_user(accounts[0].uid)
     return client
 
-async def GetUid(client: genshin.Client) -> int:
-    accounts = await client.get_game_accounts()
-    uid = accounts[0].uid
-    return uid
+async def GetUid(client: genshin.Client, server: Union[str, None] = None) -> int:
+    if server == None:
+        accounts = await client.genshin_accounts()
+        uidList = [account.uid for account in accounts]
+    else:
+        accounts = list(filter(lambda account: account.server == server, await client.genshin_accounts()))
+        assert len(accounts) == 1
+        uidList = accounts[0].uid        
+    
+    return uidList
+
+async def GetAccounts(client: genshin.Client):
+    accounts = await client.genshin_accounts()
+    return accounts
+
+async def GetServer(client: genshin.Client):
+    accounts: Sequence[GenshinAccount] = await GetAccounts()
+    serverList = [account.server for account in accounts]
+    return serverList
+

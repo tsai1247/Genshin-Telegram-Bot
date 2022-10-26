@@ -15,8 +15,6 @@ from TelegramApi import *
 from Database.Cookie import *
 from GenshinClient import *
 
-import genshin
-
 async def startbot(update: Update, bot):
     if(isDos(update)): return
     appendlog(update)
@@ -61,10 +59,22 @@ async def note(update: Update, bot):
     if(isDos(update)): return
     appendlog(update)
 
-    msg = await Get_Genshin_Notes(update)
-    await Reply(update, msg)  
-    
+    accountList: Sequence[GenshinAccount] = await GetAccounts(GetClient(update))
+    serverList = [account.server for account in accountList]
+    buttonTexts = [account.server_name for account in accountList]
+    replyTexts = [   
+        json.dumps({
+            'status': UserStatus.WaitForNotes,
+            'userID': GetUserID(update),
+            'command': i
+        }) for i in serverList
+    ]
 
+    await ReplyButton(update, "Select a server", 
+        [buttonTexts], 
+        [replyTexts]
+    )
+    
 async def gift(update: Update, bot):    
     if(isDos(update)): return 
     appendlog(update)
@@ -72,7 +82,6 @@ async def gift(update: Update, bot):
     await Reply(update, Language.displaywords.str_enter_redeem_code, forceReply = True)
     UserStatus.set(update, UserStatus.RedeemCode)
     
-
 async def hi(update: Update, bot):
     appendlog(update)
     await Reply(update, f"hi, {update.message.from_user.full_name}")
@@ -105,8 +114,10 @@ async def getText(update: Update, bot):
         appendlog(update, 'redeemCode')
         text = update.message.text
         codeList = getRedeemCode(text)
-        msg = await Redeem_Code(update, codeList)
-        await Reply(update, msg)
+        for code in codeList:
+            await Reply(update, f'Redeeming {code}: ')
+            msg = await Redeem_Code(update, code)
+            await Reply(update, msg)
 
         UserStatus.delete(update)
 
@@ -163,3 +174,8 @@ async def callback(update: Update, bot):
         autoDaily = 1 if (command == 'open') else 0
         Daily.Set(userID, autoDaily)
         await Send(int(userID), f"auto-claim the daily rewards: {command}")
+
+    elif int(status) == UserStatus.WaitForNotes:
+        status, userID, server = data['status'], data['userID'], data['command']
+        msg = await Get_Genshin_Notes(userID, server)
+        await Send(userID, msg)  

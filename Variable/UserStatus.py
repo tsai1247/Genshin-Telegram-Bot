@@ -11,6 +11,7 @@ class UserStatus:
     SetCookie = 1
     RedeemCode = 2
     SetDaily = 3
+    WaitForNotes = 4
     
     def GetKey(key: Union[Update, str]) -> int:
         if type(key) is Update:
