@@ -1,4 +1,5 @@
 import math
+from math import *
 
 def CalculateWithTimeout():
     fr = open('solution.txt', 'r')
