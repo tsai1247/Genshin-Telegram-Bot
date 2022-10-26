@@ -1,7 +1,8 @@
-from asyncio import sleep
+from typing import List
 import asyncio
 
 import genshin
+from genshin import Client
 from genshin.client.components.base import *
 
 from TelegramApi import *
@@ -20,6 +21,71 @@ async def redeem_code(update: Update, code: str):
         return
     else:
         await Reply(update, f"{Language.displaywords.str_redeem_successful}: {code}")
+
+timer = datetime.now()
+async def redeem_code(client: Client, code, attemptTime = 8)-> str: 
+    global timer
+    await asyncio.sleep(4 - (datetime.now() - timer).seconds)
+
+    uid = await GetUid(client)
+    msg = Language.displaywords.str_RedemptionException
+    for _attempt in range(attemptTime):
+        try:
+            await client.redeem_code(code, uid)
+            msg = Language.displaywords.str_redeem_successful
+        except genshin.RedemptionCooldown:
+            await asyncio.sleep(1)
+            continue
+        except genshin.RedemptionClaimed:
+            msg = Language.displaywords.str_RedemptionClaimed
+            break
+        except genshin.RedemptionInvalid:
+            msg = Language.displaywords.str_RedemptionInvalid
+            break
+        except genshin.RedemptionException:
+            msg = Language.displaywords.str_RedemptionException
+            break
+
+    timer = datetime.now()
+    return msg
+
+async def Redeem_Code(update: Update, codeList: List[str]):
+    global timer
+    msg = []
+    for i in range(len(codeList)):
+        code = codeList[i]    
+        client = GetClient(update)
+        msg.append(await redeem_code(client, code))
+    return msg
+
+
+
+async def Claim_Daily_Reward(update: Update):
+    try:
+        client = GetClient(update)
+        reward = await client.claim_daily_reward(game=genshin.Game.GENSHIN)
+        msg = f'{Language.displaywords.str_daily_successful} {reward.amount}x {reward.name}！'
+    except genshin.errors.InvalidCookies:
+        msg = f'{Language.displaywords.str_InvalidCookies}'
+    except genshin.errors.AlreadyClaimed:
+        msg = f'{Language.displaywords.str_AlreadyClaimed}'
+
+    return msg
+
+async def Get_Genshin_Notes(update: Update):
+    client = GetClient(update)
+    uid = await GetUid(client)
+    data = await client.get_genshin_notes(uid)
+    msg = [
+        Language.displaywords.GetResinMsg(data),
+        Language.displaywords.GetRealmCurrencyMsg(data),
+        Language.displaywords.GetCommissionsMsg(data),
+        Language.displaywords.GetResin_DiscountsMsg(data),
+        Language.displaywords.GetTransformerMsg(data),
+        Language.displaywords.GetExpeditionsMsg(data)
+    ]
+
+    return msg
 
 def GetClient(update: Union[Update, int]):
     if type(update) is Update:

@@ -1,6 +1,8 @@
 import sqlite3
 import genshin
 
+from Language import Language
+
 class Cookie:
     @staticmethod
     def Get(userID: int):
@@ -19,25 +21,31 @@ class Cookie:
 
     @staticmethod
     def Set(ID: int, cookie: str):
-        ltuid = cookie.split('ltuid=')[1].split(';')[0]
-        ltoken = cookie.split('ltoken=')[1].split(';')[0]
-        cookie_token = cookie.split('cookie_token=')[1].split(';')[0]
-        account_id = cookie.split('account_id=')[1].split(';')[0]
-        
-        sql = sqlite3.connect('KaTsu.db')
-        cur = sql.cursor()
-        cur.execute("select userID from Cookie where userID = ?", [ID])
-        data = cur.fetchone()
-        if(data == None):   # insert
-            cur.close()
+        try:
+            ltuid = cookie.split('ltuid=')[1].split(';')[0]
+            ltoken = cookie.split('ltoken=')[1].split(';')[0]
+            cookie_token = cookie.split('cookie_token=')[1].split(';')[0]
+            account_id = cookie.split('account_id=')[1].split(';')[0]
+            
+            sql = sqlite3.connect('KaTsu.db')
             cur = sql.cursor()
-            cur.execute("insert into Cookie values(?, ?, ?, ?, ?)", [ID, ltuid, ltoken, cookie_token, account_id])
-            sql.commit()
-        else:               # update
+            cur.execute("select userID from Cookie where userID = ?", [ID])
+            data = cur.fetchone()
+            if(data == None):   # insert
+                cur.close()
+                cur = sql.cursor()
+                cur.execute("insert into Cookie values(?, ?, ?, ?, ?)", [ID, ltuid, ltoken, cookie_token, account_id])
+                sql.commit()
+            else:               # update
+                cur.close()
+                cur = sql.cursor()
+                cur.execute("update Cookie set ltuid = ?, ltoken = ?, cookie_token = ?, account_id = ? \
+                            where userID = ?", [ltuid, ltoken, cookie_token, account_id, ID])
+                sql.commit()
             cur.close()
-            cur = sql.cursor()
-            cur.execute("update Cookie set ltuid = ?, ltoken = ?, cookie_token = ?, account_id = ? \
-                         where userID = ?", [ltuid, ltoken, cookie_token, account_id, ID])
-            sql.commit()
-        cur.close()
-        sql.close()
+            sql.close()
+            msg = Language.displaywords.str_cookie_successful
+        except:
+            msg = Language.displaywords.str_cookie_fail
+            
+        return msg

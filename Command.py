@@ -1,6 +1,8 @@
 import asyncio
+import json
 import shlex
 from subprocess import Popen
+from typing import Dict
 from Daily import Daily
 from Language import Language
 from Logger import appendlog
@@ -20,67 +22,60 @@ async def startbot(update: Update, bot):
     appendlog(update)
     await Reply(update, Language.displaywords.str_welcome)
     
-
 async def help(update: Update, bot):
     if(isDos(update)): return
     appendlog(update)
     await Reply(update, Language.displaywords.str_help)
     
-
 async def setcookie(update: Update, bot):
     if(isDos(update)): return
     appendlog(update)
 
     await Reply(update, Language.displaywords.str_enter_cookie, forceReply = True)
-    await Reply(update, Language.displaywords.str_cookie_tutorial)
-    await Reply(update, Language.displaywords.str_cookie_javascript_command)
+    await Reply(update, [
+        Language.displaywords.str_cookie_tutorial,
+        Language.displaywords.str_cookie_javascript_command
+    ])
     UserStatus.set(update, UserStatus.SetCookie)
     
 async def daily(update: Update, bot):
     if(isDos(update)): return
     appendlog(update)
 
-    client = GetClient(update)
-    reward = await client.claim_daily_reward(game=genshin.Game.GENSHIN)
+    msg = await Claim_Daily_Reward(update)
+
     buttonTexts = ['open', 'close']
-    await ReplyButton(update, f'{Language.displaywords.str_daily_successful} {reward.amount}x {reward.name}！', 
+    replyTexts = [   
+        json.dumps({
+            'status': UserStatus.SetDaily,
+            'userID': GetUserID(update),
+            'command': i
+        }) for i in buttonTexts
+    ]
+    await ReplyButton(update, msg, 
         [buttonTexts], 
-        [[f'{UserStatus.SetDaily} {GetUserID(update)} {i}' for i in buttonTexts]], 
+        [replyTexts]
     )
 
 async def note(update: Update, bot):
     if(isDos(update)): return
     appendlog(update)
 
-    client = GetClient(update)
-    accounts = await client.get_game_accounts()
-    uid = accounts[0].uid
-    data = await client.get_genshin_notes(uid)
-    
-    await Reply(update, [
-        Language.displaywords.GetResinMsg(data),
-        Language.displaywords.GetRealmCurrencyMsg(data),
-        Language.displaywords.GetCommissionsMsg(data),
-        Language.displaywords.GetResin_DiscountsMsg(data),
-        Language.displaywords.GetTransformerMsg(data),
-        Language.displaywords.GetExpeditionsMsg(data)
-    ])  
+    msg = await Get_Genshin_Notes(update)
+    await Reply(update, msg)  
     
 
 async def gift(update: Update, bot):    
-    if(isDos(update)): return
+    if(isDos(update)): return 
     appendlog(update)
+
     await Reply(update, Language.displaywords.str_enter_redeem_code, forceReply = True)
     UserStatus.set(update, UserStatus.RedeemCode)
     
 
 async def hi(update: Update, bot):
     appendlog(update)
-    try:
-        await Reply(update, f"hi, {update.message.from_user.name}")
-    except:
-        await Reply(update, f"hi, {update.message.from_user.first_name}")
-    
+    await Reply(update, f"hi, {update.message.from_user.full_name}")
 
 async def notice(update: Update, bot):
     if(isDos(update)): return
@@ -91,7 +86,7 @@ async def setaccount(update: Update, bot):
     NotImplemented()
 
 async def getText(update: Update, bot):
-    def getCode(text: str):
+    def getRedeemCode(text: str):
         candidates = text.split()
         ret = filter(lambda x: x.isalnum(), candidates)
         return list(ret)
@@ -102,29 +97,16 @@ async def getText(update: Update, bot):
     if UserStatus.get(update) == UserStatus.SetCookie:
         appendlog(update, 'set cookie')
         cookie = update.message.text
-        Cookie.Set(GetUserID(update), cookie)
-        await Reply(update, Language.displaywords.str_cookie_successful)
+        msg = Cookie.Set(GetUserID(update), cookie)
+        await Reply(update, msg)
         UserStatus.delete(update)
-        
 
     elif UserStatus.get(update) == UserStatus.RedeemCode:
         appendlog(update, 'redeemCode')
         text = update.message.text
-        codeList = getCode(text)
-        print(codeList)
-        for i in range(len(codeList)):
-            code = codeList[i]
-            if i != 0:            
-                await asyncio.sleep(3.5)
-            try:
-                await redeem_code(update, code)
-            except genshin.RedemptionClaimed:
-                await Reply(update, + f"{Language.displaywords.str_RedemptionClaimed}: {code}")
-            except genshin.RedemptionInvalid:
-                await Reply(update, f"{Language.displaywords.str_RedemptionInvalid}: {code}")
-            except genshin.RedemptionException as e:
-                await Reply(update, f"{Language.displaywords.str_RedemptionException}: {code}")
-                logging.info(f'[retcode]{e.retcode} [內容]{e.original}')
+        codeList = getRedeemCode(text)
+        msg = await Redeem_Code(update, codeList)
+        await Reply(update, msg)
 
         UserStatus.delete(update)
 
@@ -171,10 +153,13 @@ async def math(update: Update, bot):
         await Send(GetUserID(update), "我不會數學")
 
 async def callback(update: Update, bot):
-    status, userID, text = update.callback_query.data.split()
+    data: Dict = json.loads(update.callback_query.data)
+    status, userID, command = data['status'], data['userID'], data['command']
     appendlog(int(userID), 'call back (button clicked)')
+
     if int(status) == UserStatus.SetDaily:
-        autoDaily = 1 if (text == 'open') else 0
         appendlog(int(userID), 'switch daily')
+
+        autoDaily = 1 if (command == 'open') else 0
         Daily.Set(userID, autoDaily)
-        await Send(int(userID), f"auto-claim the daily rewards: {text}")
+        await Send(int(userID), f"auto-claim the daily rewards: {command}")

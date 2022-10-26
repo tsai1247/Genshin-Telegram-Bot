@@ -58,9 +58,17 @@ class Daily:
 
     @staticmethod
     async def AutoClaim(hour=4, minute=1, second = 0):
-        # await asyncio.sleep(10)
         logging.info('auto claim thread start')
         while True:
+            now = datetime.now()
+            tomorrow = datetime.now()
+            tomorrow = tomorrow.replace(day = tomorrow.day + 1, hour=hour, minute=minute, second=second)
+
+            wait_for = (tomorrow - now).seconds
+
+            logging.info(f'Auto claim mission finished.  Sleep for {wait_for} seconds')
+            await asyncio.sleep(wait_for)
+            
             userIDList = Daily.GetAll()
             for userID in userIDList:
                 try:
@@ -74,10 +82,4 @@ class Daily:
                     await Send(userID, Language.displaywords.str_AlreadyClaimed)
 
 
-            now = datetime.now()
-            tomorrow = datetime.now()
-            tomorrow = tomorrow.replace(day = tomorrow.day + 1, hour=hour, minute=minute, second=second)
 
-            wait_for = (tomorrow - now).seconds
-            logging.info(f'Auto claim mission finished.  Sleep for {wait_for} seconds')
-            await asyncio.sleep(wait_for)

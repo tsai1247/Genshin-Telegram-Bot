@@ -37,8 +37,9 @@ class en():
     str_enter_redeem_code = 'Enter the code'
     
     str_cookie_successful = 'cookie is updated'
+    str_cookie_fail = 'update cookie...failed, please check the cookie format'
 
-    str_redeem_cooldown_waiting = 'redeem system cooldown; another attempt is in 3 seconds...'
+    str_redeem_cooldown_waiting = 'redeem system cooldown. '
     
     def getStrftime(self, time: datetime):
         now = datetime.now(timezone.utc)
