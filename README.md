@@ -14,7 +14,7 @@ The repository references [KT-Yeh's repo](https://github.com/KT-Yeh/Genshin-Disc
 * 可以在Telegram上直接使用此bot，來完成：
   - 查詢即時便箋，包含樹脂、洞天寶錢、參數質變儀、探索派遣完成時間...等
   - Hoyolab 使用兌換碼
-  - Hoyolab 自動簽到(目前為手動)
+  - Hoyolab 自動簽到
 * 未來將有以下功能：
   - 自動檢查樹脂，並當樹脂將滿時發送提醒
   - 加入"群組"功能，可以一次對"群組"內的所有玩家使用兌換碼
