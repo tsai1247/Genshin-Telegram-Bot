@@ -180,5 +180,7 @@ async def callback(update: Update, bot):
 
     elif int(status) == UserStatus.WaitForNotes:
         status, userID, server = data['status'], data['userID'], data['command']
-        msg = await Get_Genshin_Notes(userID, server)
-        await Send(userID, msg)  
+        message = await Send(userID, 'Loading...')
+        text = await Get_Genshin_Notes(userID, server)
+        await EditText(message, text[0])
+        await Send(userID, text[1:])
