@@ -28,7 +28,6 @@ async def ReplyPhoto(update: Update, photolink: str) -> None:
     return replyMsg
 
 async def ReplyButton(update: Update, title: str, buttonText = List[List[str]], replyText = List[List[str]]):
-    
     buttonList = buttonText
     for i in range(len(buttonList)):
         for j in range(len(buttonList[i])):
@@ -52,6 +51,18 @@ async def Send(chat_id: int, msg: str):
 async def EditText(message: Message, text: str):
     await message.edit_text(text)
     return message
+
+
+async def EditButton(message: Message, title: str, buttonText = List[List[str]], replyText = List[List[str]]):
+    buttonList = buttonText
+    for i in range(len(buttonList)):
+        for j in range(len(buttonList[i])):
+            buttonList[i][j] = InlineKeyboardButton(buttonText[i][j], callback_data = replyText[i][j]) 
+
+    await message.edit_text(title, reply_markup = InlineKeyboardMarkup(buttonList))
+    return message
+
+
 
 def GetUserID(update: Update) -> int:
     return update.message.from_user.id

@@ -61,6 +61,7 @@ async def note(update: Update, bot):
     if(isDos(update)): return
     appendlog(update)
 
+    message: Message = await Reply(update, "Searching your genshin servers...")
     accountList: Sequence[GenshinAccount] = await GetAccounts(GetClient(update))
     serverList = [account.server for account in accountList]
     buttonTexts = [account.server_name for account in accountList]
@@ -71,8 +72,7 @@ async def note(update: Update, bot):
             'command': i
         }) for i in serverList
     ]
-
-    await ReplyButton(update, "Select a server", 
+    await EditButton(message, "Select a server", 
         [buttonTexts], 
         [replyTexts]
     )

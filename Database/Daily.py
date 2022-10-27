@@ -47,8 +47,8 @@ class Daily:
             tomorrow = tomorrow.replace(day = tomorrow.day + 1, hour=hour, minute=minute, second=second)
 
             wait_for = (tomorrow - now).seconds
-
-            logging.info(f'Auto claim mission finished.  Sleep for {wait_for} seconds')
+            str_wait_for = f'{wait_for//60//60} hr(s), {wait_for//60%60} min(s), {wait_for%60} sec(s)' 
+            logging.info(f'Auto claim mission finished.  Sleep for {str_wait_for}')
             await asyncio.sleep(wait_for)
             
             userIDList = Daily.GetAll()
