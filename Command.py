@@ -107,7 +107,7 @@ async def getText(update: Update, bot):
 
     if UserStatus.get(update) == UserStatus.SetCookie:
         appendlog(update, 'set cookie')
-        cookie = update.message.text
+        cookie = Cookie.Dumps(update.message.text)
         msg = Cookie.Set(GetUserID(update), cookie)
         await Reply(update, msg)
         UserStatus.delete(update)

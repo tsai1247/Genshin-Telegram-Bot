@@ -1,6 +1,7 @@
+from typing import Dict
 import genshin
 from .Sql import Sql
-
+from http.cookies import SimpleCookie
 from Language import Language
 
 class Cookie:
@@ -18,13 +19,18 @@ class Cookie:
         return data
 
     @staticmethod
-    def Set(userID: int, cookie: str):
+    def Dumps(text: str): # "a=?, b=?, c=?"
+        cookie = SimpleCookie()
+        cookie.load(text)
+        return {k: v.value for k, v in cookie.items()}
+
+    @staticmethod
+    def Set(userID: int, cookie: Dict):
         try:
-            ltuid = cookie.split('ltuid=')[1].split(';')[0]
-            ltoken = cookie.split('ltoken=')[1].split(';')[0]
-            cookie_token = cookie.split('cookie_token=')[1].split(';')[0]
-            account_id = cookie.split('account_id=')[1].split(';')[0]
-            
+            ltuid = cookie['ltuid']
+            ltoken = cookie['ltoken']
+            cookie_token = cookie['cookie_token']
+            account_id = cookie['account_id']
 
             data = Sql.select(Cookie.tablename, keyfield=['userID'], keyvalue=[userID])
             if len(data) == 0:   # insert
