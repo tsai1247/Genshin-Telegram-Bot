@@ -7,8 +7,14 @@ from dotenv import load_dotenv
 load_dotenv()
 
 dos_defence = {}
-penalty = Config.Get('penalty')
-dos_maximum = Config.Get('dos_maximum')
+
+if Config.Get('penalty')['Val'] == None:
+    Config.Set('penalty', 120)
+penalty = Config.Get('penalty')['Val']
+
+if Config.Get('dos_maximum')['Val'] == None:
+    Config.Set('dos_maximum', 25)
+dos_maximum = Config.Get('dos_maximum')['Val']
 
 def isDos(update: Update):
     if update.message.from_user.id != update.message.chat.id:

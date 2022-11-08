@@ -4,6 +4,9 @@ import logging
 import threading
 from dotenv import load_dotenv
 
+from Database.Init import init_table
+init_table()
+
 from Command import *
 from TelegramApi import app
 
@@ -17,6 +20,7 @@ def AutoClaim_loop():
     asyncio.set_event_loop(loop)
     loop.run_until_complete(Daily.AutoClaim())
     loop.close()
+
 
 # Main
 def main():
