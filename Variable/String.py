@@ -35,7 +35,9 @@ class en():
     str_daily_successful = 'Successful. Get'
 
     str_enter_redeem_code = 'Enter the code'
-    
+    str_empty_redeemcode_input = 'Get no code from your input'
+    str_redeemcode_end = 'End of redemption'
+
     str_cookie_successful = 'cookie is updated'
     str_cookie_fail = 'update cookie...failed, please check the cookie format'
 

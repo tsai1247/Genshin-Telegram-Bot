@@ -34,4 +34,8 @@ async def error_handler(update: Update, context: CallbackContext) -> None:
         else:
             logging.warning(f"[例外]: [錯誤訊息]{context.error}")
 
-        UserStatus.delete(update)
+        try:
+            if update in UserStatus:
+                UserStatus.delete(update)
+        except:
+            pass

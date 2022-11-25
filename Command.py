@@ -1,4 +1,5 @@
 import asyncio
+import re
 import json
 import shlex
 from subprocess import Popen
@@ -98,9 +99,11 @@ async def setaccount(update: Update, bot):
 
 async def getText(update: Update, bot):
     def getRedeemCode(text: str):
-        candidates = text.split()
-        ret = filter(lambda x: x.isalnum(), candidates)
-        return list(ret)
+        candidates = re.split('[.,\n\t \r]', text)
+        ret = filter(lambda x: 
+            x.isascii() and x.isalnum() and not x.isnumeric() and not x.isalpha() and len(x) > 8 and len(x) < 16, candidates)
+        ret = list(ret)
+        return ret
 
     if(isDos(update)): return
     appendlog(update)
@@ -117,11 +120,15 @@ async def getText(update: Update, bot):
         text = update.message.text
         userID = GetUserID(update)
         codeList = getRedeemCode(text)
+        if len(codeList) == 0:
+            await Send(userID , Language.displaywords.str_empty_redeemcode_input)
+            return
+        
         for code in codeList:
             message: Message = await Send(userID , f'Redeeming {code}: ')
             text = await Redeem_Code(update, code)
             await EditText(message, f"{message.text}\n{text}")
-
+        await Send(userID, Language.displaywords.str_redeemcode_end)
         UserStatus.delete(update)
 
 async def math(update: Update, bot):
