@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 import genshin
 from Database.Sql import Sql
@@ -40,17 +40,19 @@ class Daily:
 
     @staticmethod
     async def AutoClaim(hour=4, minute=1, second = 0):
+        def getNextDay(hour = hour, minute = minute, second = second):
+            ret = datetime.now() + timedelta(hours=23, minutes=59, seconds=59)
+            ret = ret.replace(hour=hour, minute=minute, second=second)
+            return ret
+
+        def getWaitSeconds():
+            A_DAY = 60*60*24
+            now = datetime.now()
+            ori = datetime.now().replace(hour=hour, minute=minute, second=second)
+            return A_DAY - (now - ori).seconds
+
         logging.info('auto claim thread start')
         while True:
-            now = datetime.now()
-            tomorrow = datetime.now()
-            tomorrow = tomorrow.replace(day = tomorrow.day + 1, hour=hour, minute=minute, second=second)
-
-            wait_for = (tomorrow - now).seconds
-            str_wait_for = f'{wait_for//60//60} hr(s), {wait_for//60%60} min(s), {wait_for%60} sec(s)' 
-            logging.info(f'Auto claim mission finished.  Sleep for {str_wait_for}')
-            await asyncio.sleep(wait_for)
-            
             userIDList = Daily.GetAll()
             for userID in userIDList:
                 try:
@@ -63,5 +65,10 @@ class Daily:
                 except genshin.errors.AlreadyClaimed:
                     await Send(userID, Language.displaywords.str_AlreadyClaimed)
 
+            wait_for = getWaitSeconds()
+            str_wait_for = f'{wait_for//60//60} hr(s), {wait_for//60%60} min(s), {wait_for%60} sec(s)' 
+            logging.info(f'Auto claim mission finished.  Sleep for {str_wait_for}')
+            await asyncio.sleep(wait_for)
+            
 
 
