@@ -101,7 +101,7 @@ async def getText(update: Update, bot):
     def getRedeemCode(text: str):
         candidates = re.split('[.,\n\t \r]', text)
         ret = filter(lambda x: 
-            x.isascii() and x.isalnum() and not x.isnumeric() and not x.isalpha() and len(x) > 8 and len(x) < 16, candidates)
+            x.isascii() and x.isalnum() and not x.isnumeric() and len(x) > 8 and len(x) < 16, candidates)
         ret = list(ret)
         return ret
 
