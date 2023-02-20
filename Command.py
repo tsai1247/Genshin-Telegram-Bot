@@ -41,7 +41,6 @@ async def setcookie(update: Update, bot):
     
 
 async def repeat(update: Update, bot):
-    if(isDos(update)): return
     appendlog(update)
     text = update.message.text.split(' ')
     if len(text) == 1:
