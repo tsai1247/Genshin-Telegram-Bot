@@ -39,6 +39,17 @@ async def setcookie(update: Update, bot):
     ])
     UserStatus.set(update, UserStatus.SetCookie)
     
+
+async def repeat(update: Update, bot):
+    if(isDos(update)): return
+    appendlog(update)
+    text = update.message.text.split(' ')
+    if len(text) == 1:
+        text = '/repeat'
+    else:
+        text = ' '.join(text[1:])
+    await Send(GetGroupID(update), text)
+
 async def daily(update: Update, bot):
     if(isDos(update)): return
     appendlog(update)

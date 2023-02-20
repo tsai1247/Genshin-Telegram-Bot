@@ -37,6 +37,7 @@ def main():
     app.add_handler(CommandHandler('notice', notice))
     app.add_handler(CommandHandler('account', setaccount))
     app.add_handler(CommandHandler('math', math))
+    app.add_handler(CommandHandler('repeat', repeat))
     
     # when getting a text without command
     app.add_handler(MessageHandler(filters.TEXT, getText))
