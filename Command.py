@@ -111,7 +111,7 @@ async def getText(update: Update, bot):
     def getRedeemCode(text: str):
         candidates = re.split('[.,\n\t \r]', text)
         ret = filter(lambda x: 
-            x.isascii() and x.isalnum() and not x.isnumeric() and len(x) > 8 and len(x) < 16, candidates)
+            x.isascii() and x.isalnum() and not x.isnumeric() and not x.islower() and len(x) > 8 and len(x) < 16, candidates)
         ret = list(ret)
         return ret
 
@@ -129,7 +129,7 @@ async def getText(update: Update, bot):
         appendlog(update, 'redeemCode')
         text = update.message.text
         userID = GetUserID(update)
-        codeList = getRedeemCode(text)
+        codeList = list(set(getRedeemCode(text))) 
         if len(codeList) == 0:
             await Send(userID , Language.displaywords.str_empty_redeemcode_input)
             return
